@@ -16,49 +16,12 @@ public:
 
 private:
     Pose pose;
-    bool isFast = false;
-    void Move(void) noexcept
-    {
-        if (pose.heading == 'E') {
-            ++pose.x;
-        } else if (pose.heading == 'W') {
-            --pose.x;
-        } else if (pose.heading == 'N') {
-            ++pose.y;
-        } else if (pose.heading == 'S') {
-            --pose.y;
-        }
-    }
-    void TurnLeft(void) noexcept
-    {
-        if (pose.heading == 'E') {
-            pose.heading = 'N';
-
-        } else if (pose.heading == 'N') {
-            pose.heading = 'W';
-
-        } else if (pose.heading == 'W') {
-            pose.heading = 'S';
-
-        } else if (pose.heading == 'S') {
-            pose.heading = 'E';
-        }
-    }
-    void TurnRight(void) noexcept
-    {
-        if (pose.heading == 'E') {
-            pose.heading = 'S';
-
-        } else if (pose.heading == 'S') {
-            pose.heading = 'W';
-
-        } else if (pose.heading == 'W') {
-            pose.heading = 'N';
-
-        } else if (pose.heading == 'N') {
-            pose.heading = 'E';
-        }
-    }
+    bool fast{false};
+    bool IsFast(void) const noexcept;
+    void Fast(void) noexcept;
+    void Move(void) noexcept;
+    void TurnLeft(void) noexcept;
+    void TurnRight(void) noexcept;
 
 private:
     class ICommand
@@ -72,6 +35,10 @@ private:
     public:
         void DoOperate(ExecutorImpl& executor) const noexcept override
         {
+            if (executor.IsFast()) {
+                executor.Move();
+            }
+
             executor.Move();
         }
     };
@@ -89,6 +56,15 @@ private:
         void DoOperate(ExecutorImpl& executor) const noexcept override
         {
             executor.TurnRight();
+        }
+    };
+    class FastCommand final : public ICommand
+    {
+    public:
+        void DoOperate(ExecutorImpl& executor) const noexcept override
+
+        {
+            executor.Fast();
         }
     };
 };
