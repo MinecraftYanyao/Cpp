@@ -18,5 +18,7 @@ private:
     Pose pose;
     bool isFast = false;
     void Move(void) noexcept;
+    void TurnLeft(void) noexcept;
+    void TurnRight(void) noexcept;
 };
 }  // namespace adas
