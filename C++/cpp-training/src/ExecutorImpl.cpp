@@ -25,13 +25,15 @@ void ExecutorImpl::Execute(const std::string& commands) noexcept
                 std::unique_ptr<MoveCommand> cmder = std::make_unique<MoveCommand>();
                 cmder->DoOperate(*this);
             }
-            TurnLeft();
+            std::unique_ptr<TurnLeftCommand> cmder = std::make_unique<TurnLeftCommand>();
+            cmder->DoOperate(*this);
         } else if (cmd == 'R') {
             if (isFast) {
                 std::unique_ptr<MoveCommand> cmder = std::make_unique<MoveCommand>();
                 cmder->DoOperate(*this);
             }
-            TurnRight();
+            std::unique_ptr<TurnRightCommand> cmder = std::make_unique<TurnRightCommand>();
+            cmder->DoOperate(*this);
         }
     }
 }
