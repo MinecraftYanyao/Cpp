@@ -22,10 +22,8 @@ void ExecutorImpl::Execute(const std::string& commands) noexcept
     //   cmderMap.emplace('R', TurnRightCommand());
     //   cmderMap.emplace(‘F’, FastCommand());
     const std::unordered_map<char, std::function<void(PoseHandler & poseHandler)>> cmderMap{
-        {'M', MoveCommand()},
-        {'L', TurnLeftCommand()},
-        {'R', TurnRightCommand()},
-        {'F', FastCommand()},
+        {'M', MoveCommand()}, {'L', TurnLeftCommand()}, {'R', TurnRightCommand()},
+        {'F', FastCommand()}, {'B', ReverseCommand()},
     };
     for (const auto cmd : commands) {
         const auto it = cmderMap.find(cmd);

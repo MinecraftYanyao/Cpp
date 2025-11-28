@@ -27,9 +27,19 @@ public:
 
     {
         if (poseHandler.IsFast()) {
-            poseHandler.Move();
+            if (poseHandler.IsReverse()) {
+                poseHandler.Backward();
+
+            } else {
+                poseHandler.Forward();
+            }
         }
-        poseHandler.Move();
+        if (poseHandler.IsReverse()) {
+            poseHandler.Backward();
+
+        } else {
+            poseHandler.Forward();
+        }
     }
 };
 class TurnLeftCommand final  //: public ICommand
@@ -46,9 +56,19 @@ public:
 
     {
         if (poseHandler.IsFast()) {
-            poseHandler.Move();
+            if (poseHandler.IsReverse()) {
+                poseHandler.Backward();
+
+            } else {
+                poseHandler.Forward();
+            }
         }
-        poseHandler.TurnLeft();
+        if (poseHandler.IsReverse()) {
+            poseHandler.TurnRight();
+
+        } else {
+            poseHandler.TurnLeft();
+        }
     }
 };
 class TurnRightCommand final  //: public ICommand
@@ -65,9 +85,19 @@ public:
 
     {
         if (poseHandler.IsFast()) {
-            poseHandler.Move();
+            if (poseHandler.IsReverse()) {
+                poseHandler.Backward();
+
+            } else {
+                poseHandler.Forward();
+            }
         }
-        poseHandler.TurnRight();
+        if (poseHandler.IsReverse()) {
+            poseHandler.TurnLeft();
+
+        } else {
+            poseHandler.TurnRight();
+        }
     }
 };
 class FastCommand final  //: public ICommand
