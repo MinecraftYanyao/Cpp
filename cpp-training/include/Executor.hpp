@@ -1,7 +1,9 @@
 #pragma once
+#include <memory>
 #include <string>
 namespace adas
 {
+enum class VehicleType { SportsCar, Bus };
 struct Pose {
     int x;
     int y;
@@ -11,7 +13,8 @@ struct Pose {
 class Executor
 {
 public:
-    static Executor* NewExecutor(const Pose& pose = {0, 0, 'N'}) noexcept;  // 构造函数
+    static std::unique_ptr<Executor> NewExecutor(const Pose& pose = {0, 0, 'N'},
+                                                 VehicleType vehicleType = VehicleType::SportsCar) noexcept;
     Executor(void) = default;
     virtual ~Executor(void) = default;
     Executor(const Executor&) = delete;

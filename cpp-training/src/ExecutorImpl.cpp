@@ -1,79 +1,61 @@
 #include "ExecutorImpl.hpp"
 
 #include <algorithm>
-#include <memory>
-#include <unordered_map>
 
-#include "CmderFactory.hpp"
-#include "Command.hpp"
-#include "Singleton.hpp"
+#include "Bus.hpp"        // 引入具体策略
+#include "Command.hpp"    // 引入 FastCommand, ReverseCommand
+#include "SportsCar.hpp"  // 引入具体策略
 
 namespace adas
 {
-Executor* Executor::NewExecutor(const Pose& pose) noexcept
+
+// 1. 实现工厂方法
+std::unique_ptr<Executor> Executor::NewExecutor(const Pose& pose, VehicleType vehicleType) noexcept
 {
-    return new (std::nothrow) ExecutorImpl(pose);
+    return std::make_unique<ExecutorImpl>(pose, vehicleType);
 }
-ExecutorImpl::ExecutorImpl(const Pose& pose) noexcept : poseHandler(pose)
+
+// 2. 构造函数：策略注入与指令注册
+ExecutorImpl::ExecutorImpl(const Pose& pose, VehicleType vehicleType) noexcept : poseHandler(pose)
 {
+    // (A) 根据类型实例化具体的车辆策略
+    if (vehicleType == VehicleType::SportsCar) {
+        vehicle = std::make_unique<SportsCar>();
+    } else if (vehicleType == VehicleType::Bus) {
+        vehicle = std::make_unique<Bus>();
+    }
+
+    // (B) 注册状态类指令 (F, B)
+    // 这里直接使用 Command.hpp 中定义的 Functor，绕过工厂的复杂性
+    cmderMap.emplace('F', FastCommand());
+    cmderMap.emplace('B', ReverseCommand());
 }
-void ExecutorImpl::Execute(const std::string& commands) noexcept
-{
-    //   std::unordered_map<char, std::function<void(PoseHandler & poseHandler)>> cmderMap;
-    //   cmderMap.emplace('M', MoveCommand());
-    //   cmderMap.emplace('L', TurnLeftCommand());
-    //   cmderMap.emplace('R', TurnRightCommand());
-    //   cmderMap.emplace(‘F’, FastCommand());
-    const auto cmders = Singleton<CmderFactory>::Instance().GetCmders(commands);
-    std::for_each(cmders.begin(), cmders.end(), [this](const Cmder& cmder) noexcept { cmder(poseHandler); });
-}
-Pose ExecutorImpl::Query() const noexcept
+
+Pose ExecutorImpl::Query(void) const noexcept
 {
     return poseHandler.Query();
 }
-void ExecutorImpl::Move(void) noexcept
+
+// 3. 核心执行逻辑
+void ExecutorImpl::Execute(const std::string& commands) noexcept
 {
-    if (pose.heading == 'E') {
-        ++pose.x;
-    } else if (pose.heading == 'W') {
-        --pose.x;
-    } else if (pose.heading == 'N') {
-        ++pose.y;
-    } else if (pose.heading == 'S') {
-        --pose.y;
+    for (const auto cmd : commands) {
+        // 分发逻辑：
+        // 如果是移动指令 (M, L, R) -> 交给 Vehicle 策略处理
+        if (cmd == 'M') {
+            vehicle->RunM(poseHandler);
+        } else if (cmd == 'L') {
+            vehicle->RunL(poseHandler);
+        } else if (cmd == 'R') {
+            vehicle->RunR(poseHandler);
+        } else {
+            // 如果是状态指令 (F, B) -> 交给 cmderMap 处理
+            const auto it = cmderMap.find(cmd);
+            if (it != cmderMap.end()) {
+                it->second(poseHandler);
+            }
+        }
     }
-}
-void ExecutorImpl::TurnLeft(void) noexcept
-{
-    if (pose.heading == 'E') {
-        pose.heading = 'N';
-    } else if (pose.heading == 'N') {
-        pose.heading = 'W';
-    } else if (pose.heading == 'W') {
-        pose.heading = 'S';
-    } else if (pose.heading == 'S') {
-        pose.heading = 'E';
-    }
-}
-void ExecutorImpl::TurnRight(void) noexcept
-{
-    if (pose.heading == 'E') {
-        pose.heading = 'S';
-    } else if (pose.heading == 'S') {
-        pose.heading = 'W';
-    } else if (pose.heading == 'W') {
-        pose.heading = 'N';
-    } else if (pose.heading == 'N') {
-        pose.heading = 'E';
-    }
-}
-void ExecutorImpl::Fast() noexcept
-{
-    fast = !fast;
-}
-bool ExecutorImpl::IsFast() const noexcept
-{
-    return fast;
 }
 
 }  // namespace adas
